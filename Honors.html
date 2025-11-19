@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zhang Yichao - Honors</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.10/pdfobject.min.js"></script>
+    <style>
+        html { scroll-behavior: smooth; }
+        [id] { scroll-margin-top: 140px; }
+        .tech-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .tech-img { border-radius: 16px; box-shadow: 0 4px 16px rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.2); transition: transform 0.2s ease; }
+        .tech-img:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(6, 182, 212, 0.2); }
+        .modal { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .modal-hidden { opacity: 0; transform: translateY(-10px); pointer-events: none; }
+        .modal-content { border-radius: 12px; border: 1px solid rgba(6, 182, 212, 0.3); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25); background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(6px); }
+        .nav-btn { transition: all 0.2s ease; border-radius: 8px; display: inline-block; cursor: pointer; }
+        .nav-btn.active { background: #06b6d4; color: white; box-shadow: 0 3px 8px rgba(6, 182, 212, 0.25); }
+        .main-nav-container { display: flex; width: 100%; justify-content: center; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+        .main-nav-btn { padding: 0.5rem 1.25rem; font-size: 0.9rem; white-space: nowrap; flex-shrink: 0; min-width: 100px; text-align: center; }
+        .sub-nav-wrapper { position: relative; padding-bottom: 2px; }
+        .sub-nav { position: absolute; top: 100%; left: 0; margin: 0; padding: 0.75rem 0.5rem; background: rgba(30, 41, 59, 0.95); border-radius: 8px; border: 1px solid rgba(6, 182, 212, 0.3); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); display: none; z-index: 100; min-width: 220px; transition-delay: 0.1s; pointer-events: none; }
+        .sub-nav-wrapper:hover .sub-nav { display: block; pointer-events: auto; }
+        .sub-nav-btn { padding: 0.5rem 1.25rem; margin: 0 0.5rem 0.5rem 0.5rem; font-size: 0.85rem; background: rgba(15, 23, 42, 0.7); white-space: nowrap; width: calc(100% - 1rem); }
+        .sub-nav-btn-wrapper { position: relative; padding-right: 2px; }
+        .sub-sub-nav { position: absolute; top: 0; left: 100%; margin: 0; padding: 0.75rem 0.5rem; background: rgba(15, 23, 42, 0.95); border-radius: 8px; border: 1px solid rgba(6, 182, 212, 0.3); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); display: none; z-index: 101; min-width: 240px; transition-delay: 0.1s; pointer-events: none; }
+        .sub-nav-btn-wrapper:hover .sub-sub-nav { display: block; pointer-events: auto; }
+        .sub-sub-nav-btn { padding: 0.4rem 1rem; margin: 0 0.5rem 0.5rem 0.5rem; font-size: 0.8rem; background: rgba(5, 15, 35, 0.7); white-space: nowrap; width: calc(100% - 1rem); }
+        .sub-nav a:hover, .sub-sub-nav a:hover { background-color: rgba(6, 182, 212, 0.2); }
+        .confidentiality-list { list-style-type: decimal; list-style-position: inside; gap: 1rem; }
+        .confidentiality-sublist { list-style-type: disc; list-style-position: inside; margin-left: 1.5rem; gap: 0.5rem; }
+        .text-gradient { background-clip: text; -webkit-background-clip: text; color: transparent; background-image: linear-gradient(90deg, #06b6d4, #3b82f6); }
+        .footer-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.4), transparent); }
+        .footer-content { display: flex; justify-content: space-around; align-items: center; width: 100%; flex-wrap: wrap; gap: 1rem; }
+        .footer-item { flex: 1; text-align: center; min-width: 200px; }
+        .policy-icon-wrapper { display: flex; align-items: center; justify-content: center; gap: 3px; }
+        .keyword-primary { color: #06b6d4; font-weight: 700; font-size: 1.15em; text-shadow: 0 0 8px rgba(6, 182, 212, 0.3); }
+        .keyword-secondary { color: #38bdf8; font-weight: 600; background: rgba(56, 189, 248, 0.1); padding: 0 3px; border-radius: 2px; }
+        .academic-card { background: rgba(30, 41, 59, 0.6); border-radius: 12px; border: 1px solid rgba(6, 182, 212, 0.2); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .academic-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(6, 182, 212, 0.15); }
+        .download-btn { position: relative; overflow: hidden; transition: all 0.3s ease; }
+        .download-btn::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent); transform: skewX(-25deg); animation: downloadGlow 2s infinite; }
+        @keyframes downloadGlow { 0% { left: -100%; } 100% { left: 100%; } }
+        .highlight-date { color: #22d3ee; font-weight: bold; font-size: 1.1rem; }
+        .highlight-achievement { color: #ffffff; font-weight: 600; background-color: rgba(6, 182, 212, 0.15); padding: 0 4px; border-radius: 3px; }
+        .btn-icon { width: 1.25rem; height: 1.25rem; }
+
+        /* Add: lock layout on small screens to 900px and allow horizontal scroll */
+        @media (max-width: 1050px) {
+            html, body {
+                min-width: 1050px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .container, .academic-card, .download-btn {
+                min-width: 1050px;
+                width: 1050px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 font-sans text-gray-100">
+    <header class="bg-gray-800/80 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-700/50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-gradient">Zhang Yichao</h1>
+            <a href="Download.html" class="text-sm text-cyan-400 hover:text-cyan-300 underline underline-offset-2 cursor-pointer transition-colors duration-300 mr-6">
+                Download All Files
+            </a>
+            <button id="confidentialityBtn" class="text-sm text-cyan-400 hover:text-cyan-300 underline underline-offset-2 cursor-pointer transition-colors duration-300">
+                Confidentiality Statement
+            </button>
+        </div>
+        <nav class="bg-gray-800/50 py-3 border-t border-gray-700/30">
+            <div class="container mx-auto px-4">
+                <div class="main-nav-container">
+                    <a href="index.html" class="main-nav-btn nav-btn bg-gray-700/50 text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                        Overview
+                    </a>
+                    <div class="sub-nav-wrapper">
+                        <a href="Academics.html" class="main-nav-btn nav-btn bg-gray-700/50 text-gray-200 font-medium hover:bg-gray-700/80 transition-colors">
+                            Academics
+                        </a>
+                        <div class="sub-nav">
+                            <a href="Academics.html#interests" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                Academic Interests
+                            </a>
+                            <div class="sub-nav-btn-wrapper relative">
+                                <a href="Academics.html#academic-experiences" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                    Academic Experiences
+                                </a>
+                                <div class="sub-sub-nav">
+                                    <a href="Academics.html#youth-program" class="nav-btn sub-sub-nav-btn text-gray-300 font-medium hover:bg-cyan-700/20 transition-colors">
+                                        Youth Science Talent Program
+                                    </a>
+                                    <a href="Academics.html#hospital-project" class="nav-btn sub-sub-nav-btn text-gray-300 font-medium hover:bg-cyan-700/20 transition-colors">
+                                        Hospital Volunteer Service Research Project
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="sub-nav-btn-wrapper relative">
+                                <a href="Academics.html#academical-ability" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                    Academical Ability
+                                </a>
+                                <div class="sub-sub-nav">
+                                    <a href="Academics.html#research-skills" class="nav-btn sub-sub-nav-btn text-gray-300 font-medium hover:bg-cyan-700/20 transition-colors">
+                                        Scientific Research Skills
+                                    </a>
+                                    <a href="Academics.html#language-skills" class="nav-btn sub-sub-nav-btn text-gray-300 font-medium hover:bg-cyan-700/20 transition-colors">
+                                        Language Skills
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-nav-wrapper">
+                        <a href="Honors.html" class="main-nav-btn nav-btn active text-white font-medium hover:bg-cyan-700/20 transition-colors">
+                            Honors & Achievements
+                        </a>
+                        <div class="sub-nav">
+                            <a href="Honors.html#scientific-research" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                Scientific Research
+                            </a>
+                            <a href="Honors.html#academic-performance" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                Academic & Comprehensive Performance
+                            </a>
+                            <a href="Honors.html#hobbies-service" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                Hobbies & Social Service
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sub-nav-wrapper">
+                        <a href="Testimonials.html" class="main-nav-btn nav-btn bg-gray-700/50 text-gray-200 font-medium hover:bg-gray-700/80 transition-colors">
+                            Testimonials & Recommendations
+                        </a>
+                        <div class="sub-nav">
+                            <a href="Testimonials.html#xin-hong" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                from Professor Xin Hong
+                            </a>
+                            <a href="Testimonials.html#lou-haochen" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                from my Homeroom Teacher
+                            </a>
+                            <a href="#" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                from my Biology Teacher
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sub-nav-wrapper">
+                        <a href="Plan.html" class="main-nav-btn nav-btn bg-gray-700/50 text-gray-200 font-medium hover:bg-gray-700/80 transition-colors">
+                            Academic & Financial Plan
+                        </a>
+                        <div class="sub-nav">
+                            <a href="Plan.html#objectives" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                Academic Objectives
+                            </a>
+                            <a href="Plan.html#journey" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                Academic Journey
+                            </a>
+                            <a href="Plan.html#academic-plan" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                Academic Plan
+                            </a>
+                            <a href="Plan.html#financial-plan" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                Financial Plan
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gradient mb-12 border-b border-cyan-500/30 pb-3 text-center">Honors & Achievements</h2>
+
+        <section id="scientific-research" class="mb-16">
+            <div class="academic-card p-6 md:p-8">
+                <div class="flex items-center gap-4 mb-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <h3 class="text-2xl md:text-3xl font-bold text-white">Scientific Research</h3>
+                </div>
+                <div class="mb-10 bg-gray-800/50 p-5 rounded-lg border-l-4 border-cyan-500">
+                    <p class="text-lg md:text-xl leading-relaxed text-gray-300">
+                        My research endeavors have been recognized through several prestigious honors and awards. During my participation in the <span class="keyword-primary">Youth Science Talent Program</span>, I distinguished myself among provincial peers and earned the "Outstanding Award of Trainees" at Zhejiang University's summer camp. Additionally, my research project on hospital volunteer services was awarded the <span class="keyword-primary">Third Prize</span> in the school-level social practice paper competition, reflecting my commitment to applying academic inquiry to real-world issues.
+                    </p>
+                </div>
+                <div class="space-y-8">
+                    <div>
+                        <h4 class="text-xl font-semibold text-cyan-400 mb-4">Youth Science Talent Program Certificates</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <a href="Camp Completion.pdf" class="download-btn bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-4 rounded-lg font-medium transition-colors flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>Zhejiang University Summer Camp Completion Certificate</span>
+                            </a>
+                            <a href="Outstanding Award.pdf" class="download-btn bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-4 rounded-lg font-medium transition-colors flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>Outstanding Award of Trainees</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-semibold text-cyan-400 mb-4">Hospital Volunteer Service Research Project Award</h4>
+                        <div class="grid grid-cols-1 gap-4">
+                            <a href="Paper Selection Third Award.pdf" class="download-btn bg-blue-600 hover:bg-blue-500 text-white px-6 py-4 rounded-lg font-medium transition-colors flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>Third Prize - 2024 Hangzhou No.2 High School Freshman Winter Vacation Social Practice Paper Selection</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="academic-performance" class="mb-16">
+            <div class="academic-card p-6 md:p-8">
+                <div class="flex items-center gap-4 mb-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <h3 class="text-2xl md:text-3xl font-bold text-white">Academic & Comprehensive Performance</h3>
+                </div>
+                <div class="mb-12">
+                    <h4 class="text-xl font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        Academic Performance
+                    </h4>
+                    <div class="bg-gray-800/50 p-5 rounded-lg border-l-4 border-blue-500 mb-6">
+                        <p class="text-lg md:text-xl leading-relaxed text-gray-300">
+                            I have maintained <span class="keyword-primary">excellent academic performance</span> throughout my middle and high school years, with particular strengths in <span class="keyword-primary">science subjects</span>. As early as elementary school, I demonstrated a natural aptitude for mathematics, which fostered a lifelong passion for STEM disciplines. My consistent academic excellence reflects my dedication to intellectual growth and mastery of foundational knowledge.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <a href="Scores.pdf" class="download-btn bg-blue-600 hover:bg-blue-500 text-white px-4 py-3 rounded-lg font-medium transition-colors flex flex-col items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>High School Transcripts</span>
+                        </a>
+                        <a href="Ruida Cup.pdf" class="download-btn bg-blue-600 hover:bg-blue-500 text-white px-4 py-3 rounded-lg font-medium transition-colors flex flex-col items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>Ruida Cup - 1st Prize (Math)</span>
+                        </a>
+                        <a href="WMO.pdf" class="download-btn bg-blue-600 hover:bg-blue-500 text-white px-4 py-3 rounded-lg font-medium transition-colors flex flex-col items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>WMO - 2nd Prize (Math)</span>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Comprehensive Abilities
+                    </h4>
+                    <div class="bg-gray-800/50 p-5 rounded-lg border-l-4 border-purple-500 mb-6">
+                        <p class="text-lg md:text-xl leading-relaxed text-gray-300">
+                            I actively participate in various extracurricular activities and am committed to helping peers. During high school, I served as <span class="keyword-primary">Class Monitor</span> and <span class="keyword-primary">Math Class Representative</span>, which honed my <span class="keyword-secondary">organizational skills</span> and <span class="keyword-secondary">leadership abilities</span>. I take pride in contributing to a positive class environment and am dedicated to serving my classmates with enthusiasm and responsibility.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <a href="Service and Leadership.pdf" class="download-btn bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>Outstanding Student Service & Leadership Award</span>
+                        </a>
+                        <a href="Merit Student.pdf" class="download-btn bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>Merit Student Certificate</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="hobbies-service">
+            <div class="academic-card p-6 md:p-8">
+                <div class="flex items-center gap-4 mb-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="text-2xl md:text-3xl font-bold text-white">Hobbies & Social Service</h3>
+                </div>
+                <div class="mb-12">
+                    <h4 class="text-xl font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Hobbies & Interests
+                    </h4>
+                    <div class="bg-gray-800/50 p-5 rounded-lg border-l-4 border-green-500 mb-6">
+                        <p class="text-lg md:text-xl leading-relaxed text-gray-300">
+                            I have a wide range of interests, with a particular passion for <span class="keyword-primary">drones</span> and <span class="keyword-primary">aerospace/nautical models</span>. In sports, I enjoy playing table tennis. During elementary and middle school, I participated in numerous model competitions, which ignited my deep interest in science and engineering. I am also a skilled <span class="keyword-primary">FPV drone pilot</span>, combining technical precision with creative flying.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <a href="FPV.pdf" class="download-btn bg-green-600 hover:bg-green-500 text-white px-6 py-4 rounded-lg font-medium transition-colors flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>FPV Drone Racing Competition - 3rd Prize</span>
+                        </a>
+                        <a href="Speedboat.pdf" class="download-btn bg-green-600 hover:bg-green-500 text-white px-6 py-4 rounded-lg font-medium transition-colors flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>Naval Modeling - Remote-Controlled Electric Speedboat Racing Certificate</span>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Social Service
+                    </h4>
+                    <div class="bg-gray-800/50 p-5 rounded-lg border-l-4 border-orange-500 mb-6">
+                        <p class="text-lg md:text-xl leading-relaxed text-gray-300">
+                            I am deeply passionate about <span class="keyword-primary">social service</span> and regularly participate in volunteer activities and charitable donations. I consistently donate my saved pocket money to charitable organizations, believing in the importance of giving back to the community. I also hold the conviction that scientific research should ultimately <span class="keyword-secondary">benefit society</span> and address real-world challenges.
+                        </p>
+                    </div>
+                    <div class="flex gap-4 mb-6">
+                        <img src="11.jpg" alt="Social Service Activity 1" class="tech-img flex-1 h-64 object-contain" />
+                        <img src="10.jpg" alt="Social Service Activity 2" class="tech-img flex-1 h-64 object-contain" />
+                        <img src="12.jpg" alt="Social Service Activity 3" class="tech-img flex-1 h-64 object-contain" />
+                    </div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <a href="unicef.pdf" class="download-btn bg-orange-600 hover:bg-orange-500 text-white px-6 py-4 rounded-lg font-medium transition-colors flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>UNICEF Monthly Donation Certificate</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 py-8 border-t border-gray-700/50">
+        <div class="container mx-auto px-4">
+            <div class="footer-divider mb-6"></div>
+            <div class="footer-content">
+                <div class="footer-item">
+                    <p class="text-gray-400">© 2025 Zhang Yichao. All rights reserved.</p>
+                </div>
+                <div class="footer-item flex items-center justify-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 012 2z" />
+                    </svg>
+                    <a href="mailto:yichaozhang2007@outlook.com" class="text-gray-300 hover:text-cyan-400 transition-colors duration-300">yichaozhang2007@outlook.com</a>
+                </div>
+                <div class="footer-item">
+                    <a href="Privacy.html" class="policy-icon-wrapper text-gray-300 hover:bg-cyan-700/20 hover:text-cyan-400 transition-colors duration-300 p-1 rounded">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.021 12.021 0 002 12a12.021 12.021 0 001.382 6.056A11.955 11.955 0 0112 21.056a11.955 11.955 0 008.618-3.04A12.021 12.021 0 0022 12a12.021 12.021 0 00-1.382-6.056z" />
+                        </svg>
+                        <span class="text-sm">Privacy Policy</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
