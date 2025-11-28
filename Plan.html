@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zhang Yichao - Plan</title>
+    <!-- Tailwind CSS 用于快速样式设计 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 自定义样式（整合Academics页面导航/页脚样式 + 保留Plan原有样式） -->
+    <style>
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* 解决锚点跳转被页头遮挡问题 - 关键修改（与Academics一致） */
+        [id] {
+            scroll-margin-top: 140px; /* 留出页头高度 */
+        }
+        /* 科技感渐变背景 */
+        .tech-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        /* 图片科技感边框 */
+        .tech-img {
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(6, 182, 212, 0.15), 0 2px 8px rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        /* 对话框科技感样式 */
+        .modal {
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-hidden {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.98);
+            pointer-events: none;
+        }
+        .modal-content {
+            border-radius: 12px;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(6, 182, 212, 0.1);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(8px);
+        }
+        /* 导航按钮样式 - 与Academics完全一致（核心修改） */
+        .nav-btn {
+            transition: all 0.2s ease;
+            border-radius: 8px;
+            display: inline-block;
+            cursor: pointer; /* 统一鼠标指针样式 */
+        }
+        .nav-btn.active {
+            background: #06b6d4;
+            color: white;
+            box-shadow: 0 3px 8px rgba(6, 182, 212, 0.25);
+        }
+        /* 主导航容器 - 确保五个按钮一行显示 */
+        .main-nav-container {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem; /* 按钮间距 */
+            flex-wrap: wrap; /* 移动端自动换行 */
+        }
+        /* 大按钮样式 - 优化宽度确保一行显示 */
+        .main-nav-btn {
+            padding: 0.5rem 1.25rem;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-width: 100px; /* 微调最小宽度 */
+            text-align: center;
+        }
+        /* 子导航样式 - 优化悬停交互（核心修改） */
+        .sub-nav-wrapper {
+            position: relative;
+            padding-bottom: 2px; /* 消除父元素与子菜单间距，避免hover中断 */
+        }
+        /* 子导航容器 - 优化显示逻辑 */
+        .sub-nav {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin: 0; /* 移除上边距，紧贴父元素 */
+            padding: 0.75rem 0.5rem;
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 8px;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 100;
+            min-width: 220px;
+            transition-delay: 0.1s; /* 延迟关闭，提升交互流畅度 */
+            pointer-events: none; /* 初始不可点击，避免误触 */
+        }
+        /* 大按钮悬停显示子导航（核心修改） */
+        .sub-nav-wrapper:hover .sub-nav {
+            display: block;
+            pointer-events: auto; /* 显示后可点击 */
+        }
+        /* 子按钮样式 - 优化点击区域 */
+        .sub-nav-btn {
+            padding: 0.5rem 1.25rem;
+            margin: 0 0.5rem 0.5rem 0.5rem;
+            font-size: 0.85rem;
+            background: rgba(15, 23, 42, 0.7);
+            white-space: nowrap;
+            width: calc(100% - 1rem);
+        }
+        
+        /* 确保导航链接触发hover状态 */
+        .sub-nav a:hover {
+            background-color: rgba(6, 182, 212, 0.2);
+        }
+        
+        /* 子子导航样式 - 从参考代码添加 */
+        .sub-nav-btn-wrapper {
+            position: relative;
+            padding-right: 2px;
+        }
+        .sub-sub-nav {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            margin: 0;
+            padding: 0.75rem 0.5rem;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 8px;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 101;
+            min-width: 240px;
+            transition-delay: 0.1s;
+            pointer-events: none;
+        }
+        .sub-nav-btn-wrapper:hover .sub-sub-nav {
+            display: block;
+            pointer-events: auto;
+        }
+        .sub-sub-nav-btn {
+            padding: 0.4rem 1rem;
+            margin: 0 0.5rem 0.5rem 0.5rem;
+            font-size: 0.8rem;
+            background: rgba(5, 15, 35, 0.7);
+            white-space: nowrap;
+            width: calc(100% - 1rem);
+        }
+        .sub-sub-nav a:hover {
+            background-color: rgba(6, 182, 212, 0.2);
+        }
+        
+        /* 文字渐变强调 */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, #06b6d4, #3b82f6);
+        }
+        /* 重点关键词强调 */
+        .keyword-primary {
+            color: #06b6d4;
+            font-weight: 700;
+            font-size: 1.15em;
+            text-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+        }
+        .keyword-secondary {
+            color: #38bdf8;
+            font-weight: 600;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 0 3px;
+            border-radius: 2px;
+        }
+        /* 边框动画 */
+        .border-glow {
+            position: relative;
+        }
+        .border-glow::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #06b6d4);
+            background-size: 400%;
+            border-radius: 18px;
+            z-index: -1;
+            animation: borderGlow 8s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .border-glow:hover::before {
+            opacity: 1;
+        }
+        @keyframes borderGlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        /* 页脚科技感分隔线（与Academics一致） */
+        .footer-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.4), transparent);
+        }
+        /* 页脚均匀分布样式（与Academics一致） */
+        .footer-content {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            flex-wrap: wrap; /* 移动端适配 */
+            gap: 1rem;
+        }
+        .footer-item {
+            flex: 1;
+            text-align: center;
+            min-width: 200px; /* 移动端最小宽度 */
+        }
+        /* 隐私政策图标容器样式（与Academics一致） */
+        .policy-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+        /* 学术板块卡片样式 */
+        .academic-card {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .academic-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(6, 182, 212, 0.15);
+        }
+        /* 时间线样式 */
+        .timeline {
+            position: relative;
+            padding-left: 2.5rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #06b6d4, #3b82f6);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: calc(-2.5rem - 6px);
+            top: 0.5rem;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #06b6d4;
+            border: 2px solid #1e293b;
+            transition: transform 0.3s ease;
+        }
+        .timeline-item:hover::before {
+            transform: scale(1.3);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+        }
+        /* 财务表格样式 */
+        .finance-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .finance-table th, 
+        .finance-table td {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(6, 182, 212, 0.1);
+        }
+        .finance-table th {
+            background: rgba(6, 182, 212, 0.1);
+            font-weight: 600;
+            color: #06b6d4;
+        }
+        .finance-table tr:last-child td {
+            border-bottom: none;
+        }
+        .finance-table tr {
+            transition: background 0.3s ease;
+        }
+        .finance-table tr:hover {
+            background: rgba(6, 182, 212, 0.05);
+        }
+        .finance-table tr.total-row {
+            background: rgba(59, 130, 246, 0.1);
+            font-weight: 600;
+        }
+        .finance-table tr.total-row:hover {
+            background: rgba(59, 130, 246, 0.15);
+        }
+        .amount-positive {
+            color: #10b981;
+            position: relative;
+            overflow: hidden;
+        }
+        .amount-negative {
+            color: #ef4444;
+            position: relative;
+            overflow: hidden;
+        }
+        /* 统一图标大小 */
+        .btn-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+        /* Add: lock layout on small screens to 900px and allow horizontal scroll */
+        @media (max-width: 1050px) {
+            html, body {
+                min-width: 1050px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .container, .modal-content, .academic-card {
+                min-width: 1050px;
+                width: 1050px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 font-sans text-gray-100">
+    <!-- 页头区域（与Academics页面完全一致 - 核心修改） -->
+    <header class="bg-gray-800/80 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-700/50">
+	<div class="container mx-auto px-4 py-4 flex justify-between items-center">
+		<h1 class="text-2xl md:text-3xl font-bold text-gradient">Zhang Yichao</h1>
+		<a href="Download.html" class="text-sm text-cyan-400 hover:text-cyan-300 underline underline-offset-2 cursor-pointer transition-colors duration-300 mr-6">Download All Files</a>
+		<button id="confidentialityBtn" class="text-sm text-cyan-400 hover:text-cyan-300 underline underline-offset-2 cursor-pointer transition-colors duration-300">
+			Confidentiality Statement
+		</button>
+	</div>
+	<!-- 第二行：导航按钮（一行显示，悬停弹出子按钮）- 与Academics结构一致 -->
+	<nav class="bg-gray-800/50 py-3 border-t border-gray-700/30">
+		<div class="container mx-auto px-4">
+			<div class="main-nav-container">
+				<a href="index.html" class="main-nav-btn nav-btn bg-gray-700/50 text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+					Overview
+				</a>
+
+				<div class="sub-nav-wrapper">
+                        <a href="Academics.html" class="main-nav-btn nav-btn bg-gray-700/50 text-gray-200 font-medium hover:bg-gray-700/80 transition-colors">
+                            Academics
+                        </a>
+                        <div class="sub-nav">
+                            <a href="Academics.html#interests" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                Academic Interests
+                            </a>
+                            <div class="sub-nav-btn-wrapper relative">
+                                <a href="Academics.html#academic-experiences" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                    Academic Experiences
+                                </a>
+                                <div class="sub-sub-nav">
+                                    <a href="Academics.html#youth-program" class="nav-btn sub-sub-nav-btn text-gray-300 font-medium hover:bg-cyan-700/20 transition-colors">
+                                        Youth Science Talent Program
+                                    </a>
+                                    <a href="Academics.html#hospital-project" class="nav-btn sub-sub-nav-btn text-gray-300 font-medium hover:bg-cyan-700/20 transition-colors">
+                                        Hospital Volunteer Service Research Project
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="sub-nav-btn-wrapper relative">
+                                <a href="Academics.html#academical-ability" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                    Academical Ability
+                                </a>
+                                <div class="sub-sub-nav">
+                                    <a href="Academics.html#research-skills" class="nav-btn sub-sub-nav-btn text-gray-300 font-medium hover:bg-cyan-700/20 transition-colors">
+                                        Scientific Research Skills
+                                    </a>
+                                    <a href="Academics.html#language-skills" class="nav-btn sub-sub-nav-btn text-gray-300 font-medium hover:bg-cyan-700/20 transition-colors">
+                                        Language Skills
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+				<div class="sub-nav-wrapper">
+					<a href="Honors.html" class="main-nav-btn nav-btn bg-gray-700/50 text-gray-200 font-medium hover:bg-gray-700/80 transition-colors">
+						Honors & Achievements
+					</a>
+					<div class="sub-nav">
+						<a href="Honors.html#scientific-research" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+							Scientific Research
+						</a>
+						<a href="Honors.html#academic-performance" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+							Academic & Comprehensive Performance
+						</a>
+						<a href="Honors.html#hobbies-service" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+							Hobbies & Social Service
+						</a>
+					</div>
+				</div>
+
+				<div class="sub-nav-wrapper">
+                        <a href="Testimonials.html" class="main-nav-btn nav-btn bg-gray-700/50 text-gray-200 font-medium hover:bg-gray-700/80 transition-colors">
+                            Testimonials & Recommendations
+                        </a>
+                        <div class="sub-nav">
+                            <a href="Testimonials.html#xin-hong" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                from Professor Xin Hong
+                            </a>
+                            <a href="Testimonials.html#lou-haochen" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                from my Homeroom and English Teacher
+                            </a>
+                            <a href="Testimonials.html#biology-teacher" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                from my Biology Teacher
+                            </a>
+                            <a href="Testimonials.html#han-minjiang" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+                                from my Chemistry Teacher
+                            </a>
+                        </div>
+                    </div>
+
+				<div class="sub-nav-wrapper">
+					<a href="Plan.html" class="main-nav-btn nav-btn active text-white font-medium hover:bg-cyan-700/20 transition-colors">
+						Academic & Financial Plan
+					</a>
+					<div class="sub-nav">
+						<a href="Plan.html#objectives" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+							Academic Objectives
+						</a>
+						<a href="Plan.html#journey" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+							Academic Journey
+						</a>
+						<a href="Plan.html#academic-plan" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+							Academic Plan
+						</a>
+						<a href="Plan.html#financial-plan" class="nav-btn sub-nav-btn text-gray-200 font-medium hover:bg-cyan-700/20 transition-colors">
+							Financial Plan
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</nav>
+</header>
+
+
+<!-- 正文区域 - 添加对应跳转ID（核心修改） -->
+<main class="container mx-auto px-4 py-8 md:py-16">
+	<!-- 页面标题 -->
+	<h2 class="text-3xl md:text-4xl font-bold text-gradient mb-12 border-b border-cyan-500/30 pb-3">Academic & Financial Plan</h2>
+
+	<!-- 1. 学术目标 - 添加ID: objectives -->
+	<section id="objectives" class="academic-card p-6 md:p-8 mb-12">
+		<div class="flex items-center gap-4 mb-6">
+			<!-- 显微镜图标 -->
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+			</svg>
+			<h3 class="text-2xl md:text-3xl font-bold text-white">Academic Objectives</h3>
+		</div>
+
+		<div class="pl-14">
+			<p class="text-lg leading-relaxed text-gray-300 mb-4">
+				My primary academic ambition is to pursue advanced research in <strong>chemistry and biology</strong>, with a focused interest in <span class="keyword-primary">functional genomics</span>, <span class="keyword-primary">physiological genetics</span>, and the chemical reaction mechanisms at the cellular level. I am particularly driven to understand life's evolutionary trajectory from the perspective of genetic variation and to solve medical challenges, such as deciphering the mechanisms of cell division and differentiation to contribute to novel therapies for diseases like cancer.
+			</p>
+			<p class="text-lg leading-relaxed text-gray-300">
+				I am convinced that a multidisciplinary approach is essential for modern life sciences, and I plan to integrate tools from statistics and computer science, including <span class="keyword-primary">AI modeling</span>, to decipher patterns in cellular processes and uncover fundamental principles of life.
+			</p>
+		</div>
+	</section>
+
+	<!-- 2. 学术之路 - 添加ID: journey -->
+	<section id="journey" class="academic-card p-6 md:p-8 mb-12">
+		<div class="flex items-center gap-4 mb-6">
+			<!-- 放大镜图标 -->
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+			</svg>
+			<h3 class="text-2xl md:text-3xl font-bold text-white">Academic Journey</h3>
+		</div>
+
+		<div class="pl-14">
+			<p class="text-lg leading-relaxed text-gray-300 mb-4">
+				I have built a strong foundation for these goals through rigorous research training. Being selected for a national "<span class="keyword-secondary">Youth Talent Program</span>" allowed me to engage in a project on "Quantitative Structure-Activity Relationship Modeling of Chemical Reactions." Through this experience, I progressed from applying standard linear regression to independently proposing data enhancement strategies and conducting comparative analyses of modeling techniques like SISSO.
+			</p>
+			<p class="text-lg leading-relaxed text-gray-300 mb-4">
+				This not only honed my practical skills in data analysis and cross-disciplinary methodology but also fostered a flexible, creative mindset, moving beyond seeking a single "best" method to developing scenario-specific strategies for complex problems.
+			</p>
+			<p class="text-lg leading-relaxed text-gray-300">
+				I possess strong English communication skills and have studied Japanese to a daily conversational level, with the goal of taking the JLPT N2 exam. This ensures I can fully participate in English-taught programs and engage in academic life. My long-term plan is to proceed to master's and doctoral studies after my undergraduate degree, aiming for a research career where I can make meaningful contributions to the life sciences.
+			</p>
+		</div>
+	</section>
+
+	<!-- 3. 学业规划 - 添加ID: academic-plan -->
+	<section id="academic-plan" class="academic-card p-6 md:p-8 mb-12">
+		<div class="flex items-center gap-4 mb-8">
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+			</svg>
+			<h3 class="text-2xl md:text-3xl font-bold text-white">Academic Plan</h3>
+		</div>
+
+		<p class="text-lg leading-relaxed text-gray-300 mb-8">
+			To achieve my objectives, I have designed a structured four-year plan to fully utilize university resources:
+		</p>
+
+		<div class="timeline">
+			<!-- 第一年 -->
+			<div class="timeline-item">
+				<h4 class="text-xl font-semibold text-cyan-400 mb-2">First Year</h4>
+				<p class="text-gray-300 leading-relaxed">
+					My focus will be on building a solid academic foundation by excelling in core courses in chemistry and biology. I will simultaneously continue to enhance my Japanese and English proficiency to ensure smooth communication. I intend to seek laboratory placements related to chemistry-biology interdisciplinary research during winter and summer breaks from the first year to gain early hands-on experience.
+				</p>
+			</div>
+
+			<!-- 第二、三年 -->
+			<div class="timeline-item">
+				<h4 class="text-xl font-semibold text-cyan-400 mb-2">Second and Third Years</h4>
+				<p class="text-gray-300 leading-relaxed">
+					I will delve deeper into specialized chemistry and biology theory, as well as interdisciplinary experimental techniques. To strengthen my integrated knowledge system, I will supplement my major with relevant courses in statistics and computer science. Active participation in seminars and workshops will help me identify specific research interests at the chemistry-biology interface and refine my experimental design skills.
+				</p>
+			</div>
+
+			<!-- 第四年 -->
+			<div class="timeline-item">
+				<h4 class="text-xl font-semibold text-cyan-400 mb-2">Fourth Year</h4>
+				<p class="text-gray-300 leading-relaxed">
+					I plan to join a research laboratory for a substantial internship or thesis project, allowing me to explore a specific direction in depth. This experience will serve as a capstone for my undergraduate studies and a bridge to future graduate research.
+				</p>
+			</div>
+		</div>
+
+		<p class="text-lg leading-relaxed text-gray-300 mt-8">
+			I plan to join a laboratory for a substantial internship or thesis project focused on chemistry-biology cross-disciplinary research, allowing me to explore a specific direction in depth. This experience will serve as a capstone for my undergraduate studies and a bridge to future graduate research in microscale reaction mechanisms and cellular-level processes
+		</p>
+	</section>
+
+	<!-- 4. 财务计划 - 添加ID: financial-plan -->
+	<section id="financial-plan" class="academic-card p-6 md:p-8">
+		<div class="flex items-center gap-4 mb-8">
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+			</svg>
+			<h3 class="text-2xl md:text-3xl font-bold text-white">Financial Plan</h3>
+		</div>
+
+		<p class="text-lg leading-relaxed text-gray-300 mb-6">
+			All amounts in the far right column are the <span class="keyword-secondary">monthly averages</span> (calculated based on total annual figures).
+		</p>
+
+		<div class="overflow-x-auto">
+			<table class="finance-table">
+				<thead>
+					<tr>
+						<th>Category</th>
+						<th>Details</th>
+						<th>Monthly Amount (JPY)</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- 收入 -->
+					<tr>
+						<td class="font-medium">Source of Funds</td>
+						<td>Family Financial Support: My parents will provide me with approximately 260,000 Japanese yen per month to support my study abroad.</td>
+						<td class="amount-positive">+260,000</td>
+					</tr>
+					<tr>
+						<td colspan="3"></td>
+					</tr>
+					<!-- 支出 -->
+					<tr>
+						<td class="font-medium">Expenses</td>
+						<td>Tuition Fees: According to the information on the University of Tsukuba's official website, the tuition fee for both the spring and autumn semesters is 267,900 yen, totaling 535,800 yen per academic year.</td>
+						<td class="amount-negative">-45,000</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>Living Expenses (including transportation, accommodation, meals, utility bills, insurance, etc.): Allocated 130,000 yen per month accounting for rising costs.</td>
+						<td class="amount-negative">-130,000</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>Entertainment Expenses (such as short trips during vacations, dining out with friends, purchasing gifts for festivals, etc.)</td>
+						<td class="amount-negative">-15,000</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>Emergency Reserve Fund (for unforeseen expenses such as sudden medical treatment due to illness or other unexpected incidents)</td>
+						<td class="amount-negative">-20,000</td>
+					</tr>
+					<tr class="total-row">
+						<td class="font-medium">Total Expenses</td>
+						<td></td>
+						<td class="amount-negative">-210,000</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="mt-8 bg-gray-800/50 p-5 rounded-lg border-l-4 border-green-500">
+			<p class="text-lg leading-relaxed text-gray-300 mb-3">
+				<span class="keyword-primary">Monthly Savings:</span> I plan to set aside a regular monthly savings of 50,000 yen, which can be used for future needs.
+			</p>
+			<p class="text-lg leading-relaxed text-gray-300">
+				<span class="keyword-primary">Additional Activities:</span> During weekends, winter vacations, and summer vacations, I plan to take part in research internships at laboratories aligned with my academic interests. I do not aim for specific remuneration, so this is not counted as income here.
+			</p>
+		</div>
+	</section>
+</main>
+
+<!-- 页底区域（与Academics页面完全一致 - 核心修改） -->
+<footer class="bg-gray-800 py-8 border-t border-gray-700/50">
+	<div class="container mx-auto px-4">
+		<div class="footer-divider mb-6"></div>
+		<div class="footer-content">
+			<!-- 版权信息 -->
+			<div class="footer-item">
+				<p class="text-gray-400">© 2025 Zhang Yichao. All rights reserved.</p>
+			</div>
+			<!-- 邮箱信息 -->
+			<div class="footer-item flex items-center justify-center gap-3">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+				</svg>
+				<a href="mailto:yichaozhang2007@outlook.com" class="text-gray-300 hover:text-cyan-400 transition-colors duration-300">yichaozhang2007@outlook.com</a>
+			</div>
+			<!-- 隐私政策 - 添加图标（与Academics一致） -->
+			<div class="footer-item">
+				<a href="Privacy.html" class="policy-icon-wrapper text-gray-300 hover:bg-cyan-700/20 hover:text-cyan-400 transition-colors duration-300 p-1 rounded">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+					</svg>
+					<span>Privacy Policy</span>
+				</a>
+			</div>
+		</div>
+	</div>
+</footer>
+
+<!-- 保密声明对话框（与Academics页面完全一致） -->
+<div id="confidentialityModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 modal modal-hidden">
+	<div class="modal-content w-full max-w-2xl mx-4 p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+		<h3 class="text-xl font-bold text-gray-900 text-gradient">Confidentiality Statement</h3>
+		<div class="text-gray-700 space-y-4">
+			<ul class="flex flex-col confidentiality-list">
+				<li class="font-medium text-gray-900">Introduction</li>
+				<li class="ml-4 mb-3">This website (the "Site") is the personal portfolio of Zhang Yichao, created for the sole purpose of showcasing his abilities, experiences, and accomplishments to university admissions committees.</li>
+				
+				<li class="font-medium text-gray-900">Scope of Confidential Information</li>
+				<li class="ml-4 mb-3">All information presented on this Site, including but not limited to downloadable files, text, photographs, images, and any other materials, is strictly confidential and constitutes personal and private information.</li>
+				
+				<li class="
+                    <li class="font-medium text-gray-900">Authorized Use</li>
+                    <li class="ml-4 mb-3">The information contained herein is intended exclusively for the review by authorized faculty and staff members of the universities to which Zhang Yichao is applying. This authorization is limited to the evaluation of his application for admission.</li>
+                    
+                    <li class="font-medium text-gray-900">Strictly Prohibited Actions</li>
+                    <li class="ml-4 mb-2">Any use of the Site's content for purposes other than those specified in Section 3 is strictly forbidden. Specifically, users are prohibited from:</li>
+                    <ul class="flex flex-col confidentiality-sublist mb-3">
+                        <li>Reproducing, distributing, or disclosing any information to any unauthorized third party.</li>
+                        <li>Using the content for any commercial or non-personal purpose.</li>
+                        <li>Downloading or storing materials beyond what is necessary for the application review process.</li>
+                    </ul>
+                    
+                    <li class="font-medium text-gray-900">Legal Rights</li>
+                    <li class="ml-4">Zhang Yichao retains all legal rights to the content of this website. Any unauthorized access, use, disclosure, or distribution of the confidential information presented on this Site may violate applicable privacy laws and regulations. Zhang Yichao expressly reserves the right to take all necessary legal action, including the right to seek remedies and damages, against any individual or entity that breaches these terms.</li>
+                </ul>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="agreeBtn" class="nav-btn active px-6 py-3 text-white font-medium hover:bg-cyan-600 transition-colors duration-300">Agree</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 功能（与Academics页面完全一致 - 核心修改） -->
+    <script>
+        // 对话框元素
+        const modal = document.getElementById('confidentialityModal');
+        const confidentialityBtn = document.getElementById('confidentialityBtn');
+        const agreeBtn = document.getElementById('agreeBtn');
+
+        // 点击保密声明按钮显示对话框
+        confidentialityBtn.addEventListener('click', () => {
+            modal.classList.remove('modal-hidden');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // 点击同意按钮隐藏对话框
+        agreeBtn.addEventListener('click', () => {
+            modal.classList.add('modal-hidden');
+            document.body.style.overflow = '';
+        });
+
+        // 点击对话框外部关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('modal-hidden');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // 按下ESC键关闭对话框
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('modal-hidden')) {
+                modal.classList.add('modal-hidden');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // 导航按钮激活状态（根据当前页面自动匹配 - 与Academics一致）
+        window.addEventListener('load', () => {
+            const currentPath = window.location.pathname;
+            const navBtns = document.querySelectorAll('.main-nav-btn');
+            
+            navBtns.forEach(btn => {
+                const href = btn.getAttribute('href');
+                if (currentPath.includes(href)) {
+                    btn.classList.add('active');
+                    btn.classList.remove('bg-gray-700/50', 'text-gray-200');
+                    btn.classList.add('text-white');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
